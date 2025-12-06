@@ -1,0 +1,7 @@
+gitbash起動
+
+git add .　すべての変更をステージングする
+
+git commit -m　"変更内容を説明するメッセージ"
+
+git push リモートリポジトリに反映する
