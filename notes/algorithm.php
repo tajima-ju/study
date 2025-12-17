@@ -16,9 +16,6 @@ for ($i = 1; $i < count($num); $i++) {
 echo "{$max}が最大です。";
 //配列の最大値を探すアルゴリズム
 
-
-
-
 $num2 = [12, 13, 23, 17, 19, 21, 4, 64];
 
 $choice_num = 16;
@@ -35,35 +32,32 @@ if ($find_num) {
 } else {
     echo "{$choice_num}は見つかりませんでした。";
 }
-//リニアサーチ（線形探索法）
 
 
 
-
-
-$num3 = [1, 2, 3, 4, 5, 7, 9, 10, 13, 15, 19, 21, 23];
+//バイナリサーチ
+$num_list = [2, 5, 7, 9, 12, 18, 23, 26];
+$target = 9;
 $head = 0;
-$tail = count($num3) - 1;
-$center = floor(($head + $tail) / 2);
-function make_center($head, $tail)
+$tail = count($num_list) - 1;
+function make_c($head, $tail)
 {
     $center = floor(($head + $tail) / 2);
+    return $center;
 }
+$center = make_c($head, $tail);
 
-while (!($head < $tail)) {
-    if ($choice_num < $num3[$center]) { //右側には存在しない tail更新
+
+
+while ($head <= $tail) {
+    $center = make_c($head, $tail);
+    if ($num_list[$center] < $target) {
+        $head = $center + 1;
+    } elseif ($num_list[$center] > $target) {
         $tail = $center - 1;
-    } else { //右側に存在 head更新
-        $head++;
+    } elseif ($num_list[$center] === $target) {
+        echo "{$target}は存在しています";
+        exit;
     }
 }
-
-
-
-// if ($choice_num < $num3[$center]) {
-// } elseif ($choice_num > $num3[$center]) {
-//     $head++;
-//     make_center($head, $tail);
-// } else {
-//     echo "{$choice_num}が存在しています。";
-// }
+echo "{$target}は存在してません";
