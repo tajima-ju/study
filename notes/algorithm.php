@@ -1,5 +1,4 @@
 <?php
-
 $num = [13, 15, 1222, 19, 21, 46];
 $max = 0;
 //最初に最大値を格納する変数を確保
@@ -61,3 +60,40 @@ while ($head <= $tail) {
     }
 }
 echo "{$target}は存在してません";
+
+
+
+
+$first_array = range(1, 100);
+$sieve_array = [];
+$Sieve_of_eratosthenes = [];
+function make_sieve_array($sieve_num)
+{
+    $base_num = $sieve_num;
+    $i = 1;
+    while ($base_num <= 100) {
+        $sieve_array[] = $base_num;
+        $i++;
+        $base_num *= $i;
+    }
+    return $sieve_array;
+}
+print_r(make_sieve_array(2));
+echo "aa";
+
+
+
+
+
+
+
+
+// function make_sieve_array($sieve_num)
+// {
+//     while ($sieve_num <= 100) {
+//         $sieve_array[] = $sieve_num;
+//         $sieve_num = $sieve_num * 2;
+//     }
+//     return $sieve_array;
+// }
+// var_dump(make_sieve_array(2));
