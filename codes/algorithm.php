@@ -207,9 +207,34 @@ $test_array = [2, 5, 6, 1, 9, 7, 5, 6, 2];
 print_r(quick_sort($test_array));
 
 
-    //  $left = quick_sort($left_array);
-    //  これはfunction quick_sort($base_array)に渡される、しかし
-    //  $base_arrayが$left_arrayに置き換わるのではなく、
-    //  $left_arrayの中身が$base_arrayに渡される
-    // 関数内に$left_arrayが引数として入るのではなく
-    // $left_arrayの中身が入っている$base_array
+//  $left = quick_sort($left_array);
+//  これはfunction quick_sort($base_array)に渡される、しかし
+//  $base_arrayが$left_arrayに置き換わるのではなく、
+//  $left_arrayの中身が$base_arrayに渡される
+// 関数内に$left_arrayが引数として入るのではなく
+// $left_arrayの中身が入っている$base_array
+
+
+//エラトステネスの篩（修正版）
+//素数、合成数判定を0，1で判定し、配列$prime_numに取り出す
+
+$base_array = array_fill(0, 101, 1);
+
+for ($i = 2; $i * $i <= 100; $i++) { //素数判定を行う
+    if (!$base_array[$i]) {
+        continue;
+    } else {
+        for ($j = 2; $j <= floor(100 / $i); $j++) { //判定された素数の倍数を取り除いていく
+            $base_array[$i * $j] = 0;
+        }
+    }
+}
+$prime_num = [];
+
+for ($k = 2; $k <= 100; $k++) {
+    if ($base_array[$k]) {
+        $prime_num[] = $k;
+    } else {
+        continue;
+    }
+}
