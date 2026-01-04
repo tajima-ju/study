@@ -93,7 +93,3 @@ class Tree
         }
     }
 }
-
-
-$test_array = [2, 5, 1, 6, 7, 11, 5, 2, 4, 6];
-$tree = new Tree($test_array);
