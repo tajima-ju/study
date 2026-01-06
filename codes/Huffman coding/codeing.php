@@ -47,6 +47,14 @@ class symbol_date
             ];
         }
 
+        $sum = 0;
+        for ($i = 0; $i < count($results); $i++) {
+            $sum += $results[$i]['count'];
+        }
+        foreach ($results as $key => $rate) {
+            $results[$key]['Appearance_rate'] = $results[$key]['count'] / $sum;
+        }
+
         usort($results, function ($a, $b) { //$resultの要素を一つずつ取り出し、$a,$bに格納、
             $tmp = $b['count'] <=> $a['count']; //降順
             if ($tmp === 0) {
@@ -54,11 +62,13 @@ class symbol_date
             }
             return $tmp;
         });
+
+
         $this->result = $results;
     }
 }
 
-$a = new symbol_date("aabbbC 1");
+$a = new symbol_date("aabbv");
 var_dump($a->result);
 // var_dump($a->symbol_array);
 // var_dump($a->test);
