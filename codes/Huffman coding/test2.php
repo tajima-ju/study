@@ -1,45 +1,20 @@
 <?php
 $a = [
-    ["A" => 2],
-    ["A" => 1],
-    ["A" => 4],
-    ["A" => 2],
-    ["A" => 1],
+    ["age" => 10, "sex" => "male", "color" => "white"],
+    ["age" => 9, "sex" => "female", "color" => "white"],
+    ["age" => 14, "sex" => "male", "color" => "black"]
 ];
 
-// var_dump($a);
+// print_r(array_column($a, 'color', 'age')); 
+// [10] => white、引数でキーを指定、 第二引数の値を値とし,第三引数の値をキーとする
 
-$sum = 0;
 
+$test = new SplPriorityQueue();
 
 for ($i = 0; $i < count($a); $i++) {
-    $sum += $a[$i]["A"];
-}
-echo $sum;
-
-
-foreach ($a as $key => $rate) {
-    $a[$key]["rate"] = $rate["A"] / $sum;
+    $test->insert($a[$i]['age'], -$a[$i]['age']);
 }
 
-var_dump($a);
-
-
-    
-//     $a[$key][] = 
-// }
-
-
-
-// array(5) {
-//   [0]=>
-//   array(3) {
-
-//     ["character"]=>
-//     string(1) "b"
-
-//     ["count"]=>
-//     int(3)
-
-//     ["first_position"]=>
-//     int(2)
+while (!($test->isEmpty())) {
+    echo $test->extract(); //14 10 9
+}

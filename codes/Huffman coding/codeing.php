@@ -6,24 +6,24 @@ class symbol_date
 {
     public int|string $symbol;
     public array $symbol_array;
-    public array $result;
+    public array $symbol_date;
 
-    public function __construct($symbol)
+    final public function __construct($symbol)
     {
         $this->symbol = $symbol;
         $this->make_symbol_array($this->symbol);
         $this->make_symbol_date($this->symbol_array);
     }
 
-    public function make_symbol_array($symbol_array): array //入力された文字列を１文字に区切って配列として戻す
+    final public function make_symbol_array($symbol): array //入力された文字列を１文字に区切って配列として戻す
     {
-        $this->symbol_array = mb_str_split($this->symbol, 1, 'UTF-8');
+        $this->symbol_array = mb_str_split($symbol, 1, 'UTF-8');
 
         return $this->symbol_array;
     }
 
 
-    public function make_symbol_date($symbol_array) //シンボルデータを作成、$resultに受け取った配列のデータを作成、格納する
+    final public function make_symbol_date($symbol_array): array //シンボルデータを作成、$resultに受け取った配列のデータを作成、格納する
     {
         $cnt  = []; //出現回数
         $first_position = []; //初登場した位置
@@ -52,11 +52,11 @@ class symbol_date
             $sum += $results[$i]['count'];
         }
         foreach ($results as $key => $rate) {
-            $results[$key]['Appearance_rate'] = $results[$key]['count'] / $sum;
+            $results[$key]['Appearance_rate'] = round($results[$key]['count'] / $sum, 2);
         }
 
         usort($results, function ($a, $b) { //$resultの要素を一つずつ取り出し、$a,$bに格納、
-            $tmp = $b['count'] <=> $a['count']; //降順
+            $tmp = $b['Appearance_rate'] <=> $a['Appearance_rate']; //降順
             if ($tmp === 0) {
                 $tmp = $a['first_position'] <=> $b['first_position']; //昇順
             }
@@ -64,11 +64,107 @@ class symbol_date
         });
 
 
-        $this->result = $results;
+        return  $this->symbol_date = $results;
     }
 }
 
-$a = new symbol_date("aabbv");
-var_dump($a->result);
+class Huffmantree_date
+{
+    private array $huffmantree_date;
+    public function __construct(symbol_date $src)
+    {
+        $this->huffmantree_date = array_column($src->symbol_date, 'Appearance_rate', 'character');
+    }
+
+    public function get_huffmantree_date(): array
+    { //$huffmantree_dateのゲッター
+        return $this->huffmantree_date;
+    }
+}
+
+class Node
+{
+    public ?string $character;
+    public ?float $weight = 0;
+    public ?Node $left = null;
+    public ?Node $right = null;
+
+
+    public function __construct($character, $weight)
+    {
+
+        $this->character = $character;
+        $this->weight = $weight;
+    }
+}
+
+class Huffmantree
+{
+    public ?Node $root = null;
+    public SplPriorityQueue $priorityQueue;
+    public array $tmp;
+    public  ?Node $cur = null;
+
+    public function __construct(Huffmantree_date $huff)
+    {
+        $sequence = 0;
+        $this->priorityQueue = new SplPriorityQueue();
+        $this->tmp = $huff->get_huffmantree_date();
+        foreach ($this->tmp as $character => $weight) {
+            $node = new Node($character, $weight);
+            $this->priorityQueue->insert($node, [-$node->weight, $sequence]);
+            $sequence++;
+        }
+    }
+
+    public function make_tree()
+    {
+        if ($this->priorityQueue->isEmpty()) {
+            return;
+        }
+
+        $node = new Node(null, null);
+
+
+        if (!isset($this->root)) {
+            $this->root = $node;
+            $this->make_tree();
+            $this->cur = $this->root;
+        }
+
+        $compare = [];
+        $compare_node1 = null;
+        $compare_node2 = null;
+        $compare[] = $compare_node1;
+        $compare[] = $compare_node2;
+        $tmp = null;
+
+
+
+
+
+        for ($i = 0; $i <= 1; $i++) {
+            if ($i === 0) {
+                $tmp[] = $this->priorityQueue->extract();
+                $compare[$i] = $tmp;
+            } else {
+                $tmp[] = $this->priorityQueue->extract();
+                $compare[$i] = $tmp;
+            }
+        }
+    }
+}
+
+
+$symbol_date = new symbol_date("abbbcc  d");
+var_dump($symbol_date->symbol_date);
+
+$huff = new Huffmantree_date($symbol_date);
+$Huffmantree = new Huffmantree($huff);
+
+
 // var_dump($a->symbol_array);
 // var_dump($a->test);
+
+// print_r($huff->huffmantree_date);
+//  $priorityQueue->insert($this->tmp[$i],-$this->tmp[$i][]);
