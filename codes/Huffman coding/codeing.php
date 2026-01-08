@@ -85,12 +85,12 @@ class Huffmantree_date
 class Node
 {
     public ?string $character;
-    public ?float $weight = 0;
+    public float $weight = 0;
     public ?Node $left = null;
     public ?Node $right = null;
 
 
-    public function __construct($character, $weight)
+    public function __construct(?string $character, float $weight)
     {
 
         $this->character = $character;
@@ -100,10 +100,11 @@ class Node
 
 class Huffmantree
 {
-    public ?Node $root = null;
     public SplPriorityQueue $priorityQueue;
     public array $tmp;
     public  ?Node $cur = null;
+    public int $sequence = 0;
+    public ?Node $result = null;
 
     public function __construct(Huffmantree_date $huff)
     {
@@ -112,48 +113,43 @@ class Huffmantree
         $this->tmp = $huff->get_huffmantree_date();
         foreach ($this->tmp as $character => $weight) {
             $node = new Node($character, $weight);
-            $this->priorityQueue->insert($node, [-$node->weight, $sequence]);
-            $sequence++;
+            $this->priorityQueue->insert($node, [-$node->weight, -$sequence]); //キューに入れるデータ：優先順位（大きい値が先頭にくる）マイナスをつけることで小さい値から取り出す。配列にすることで第二優先順位
+            $sequence++; //先に入った順から0->1...のように重みづけしていく
         }
+        $this->sequence = $sequence;
     }
 
     public function make_tree()
     {
-        if ($this->priorityQueue->isEmpty()) {
-            return;
+        $node1 = null;
+        $node2 = null;
+
+        if ($this->priorityQueue->count() === 1) { //キューが1(全て結合した)なら停止
+            return $this->result = $this->priorityQueue->extract();
         }
 
-        $node = new Node(null, null);
 
-
-        if (!isset($this->root)) {
-            $this->root = $node;
-            $this->make_tree();
-            $this->cur = $this->root;
-        }
-
-        $compare = [];
-        $compare_node1 = null;
-        $compare_node2 = null;
-        $compare[] = $compare_node1;
-        $compare[] = $compare_node2;
-        $tmp = null;
-
-
-
-
+        $node = new Node(null, 0); //ノード作成、現在カーソルをノードに合わせる
 
         for ($i = 0; $i <= 1; $i++) {
             if ($i === 0) {
-                $tmp[] = $this->priorityQueue->extract();
-                $compare[$i] = $tmp;
+                $node1 = $this->priorityQueue->extract(); //キューの先頭から取り出し$node1に格納
             } else {
-                $tmp[] = $this->priorityQueue->extract();
-                $compare[$i] = $tmp;
+                $node2 = $this->priorityQueue->extract(); //キューの先頭から取り出し$node2に格納
             }
         }
+        $node->left = $node1;
+        $node->right = $node2; //取り出したノードを左右にくっつける
+
+        $node->weight = $node1->weight + $node2->weight; //子の重みの合計を親に格納する
+
+        $this->priorityQueue->insert($node, [-$node->weight, -$this->sequence]); //キューに戻す
+        $this->sequence++;
+
+        return $this->make_tree();
     }
 }
+
 
 
 $symbol_date = new symbol_date("abbbcc  d");
