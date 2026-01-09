@@ -88,6 +88,9 @@ class Node
     public float $weight = 0;
     public ?Node $left = null;
     public ?Node $right = null;
+    public bool $visited_flag = false;
+    public ?Node $parent = null;
+    public ?string $code = null;
 
 
     public function __construct(?string $character, float $weight)
@@ -106,6 +109,7 @@ class Huffmantree
     public int $sequence = 0;
     public ?Node $result = null;
 
+
     public function __construct(Huffmantree_date $huff)
     {
         $sequence = 0;
@@ -121,32 +125,79 @@ class Huffmantree
 
     public function make_tree()
     {
-        $node1 = null;
-        $node2 = null;
+        $child_node1 = null;
+        $child_node2 = null;
 
         if ($this->priorityQueue->count() === 1) { //キューが1(全て結合した)なら停止
-            return $this->result = $this->priorityQueue->extract();
+            $this->result = $this->priorityQueue->extract();
+            return $this->result;
         }
 
 
-        $node = new Node(null, 0); //ノード作成、現在カーソルをノードに合わせる
+        $node = new Node(null, 0); //ノード作成
 
         for ($i = 0; $i <= 1; $i++) {
             if ($i === 0) {
-                $node1 = $this->priorityQueue->extract(); //キューの先頭から取り出し$node1に格納
+                $child_node1 = $this->priorityQueue->extract(); //キューの先頭から取り出し$node1に格納
             } else {
-                $node2 = $this->priorityQueue->extract(); //キューの先頭から取り出し$node2に格納
+                $child_node2 = $this->priorityQueue->extract(); //キューの先頭から取り出し$node2に格納
             }
         }
-        $node->left = $node1;
-        $node->right = $node2; //取り出したノードを左右にくっつける
 
-        $node->weight = $node1->weight + $node2->weight; //子の重みの合計を親に格納する
+        $child_node1->parent = $node; //親ノード登録
+        $child_node2->parent = $node;
+
+        $node->left = $child_node1;
+        $node->right = $child_node2; //取り出したノードを左右にくっつける
+
+        $node->weight = $child_node1->weight + $child_node2->weight; //子の重みの合計を親に格納する
 
         $this->priorityQueue->insert($node, [-$node->weight, -$this->sequence]); //キューに戻す
         $this->sequence++;
 
         return $this->make_tree();
+    }
+
+
+    public function is_leaf(Node $node) //leafならtrueを返す
+    {
+        if ($node->left === null && $node->right === null) {
+            return true;
+        }
+    }
+
+    public function search()
+    {
+        $this->cur = $this->result; //$curを先頭に持ってくる
+
+        while (!($this->is_leaf($this->cur))) { //leafじゃないなら
+            $this->cur = $this->cur->left; //左下へ
+            $this->cur->visited_flag = true;
+        }
+        //leafへ到達
+        $this->cur = $this->cur->parent; //上へ
+        while ($this->cur->right->visited_flag) { //右下訪れた事あるのなら
+            $this->cur = $this->cur->parent; //上へ
+        }
+        //右下未探索
+        $this->cur = $this->cur->right; //右下へ
+        $this->cur->visited_flag = true;
+
+        while (!($this->is_leaf($this->cur))) { //leafじゃないなら
+            $this->cur = $this->cur->left; //左下へ
+            $this->cur->visited_flag = true;
+        }
+        //この後leafではないため、上に戻る処理が必要
+
+
+
+
+
+
+
+
+
+
     }
 }
 
@@ -164,3 +215,23 @@ $Huffmantree = new Huffmantree($huff);
 
 // print_r($huff->huffmantree_date);
 //  $priorityQueue->insert($this->tmp[$i],-$this->tmp[$i][]);
+
+
+// if ($this->is_leaf($this->cur)) { c
+//             $this->cur = $this->cur->parent; //上へ
+//             if ($this->cur->right->visited_flag) {//訪れた事あるのなら
+//                 
+//             }
+//         } else { //leafじゃないなら
+
+
+function search($node)
+{
+    if ($node->left === null && $node->right === null) {
+        return;
+    }
+    $this->search($node->left);
+    $node->code = $node->code + "0";
+
+    $this->search($node->right);
+}
