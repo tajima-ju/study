@@ -90,7 +90,8 @@ class Node
     public ?Node $right = null;
     public bool $visited_flag = false;
     public ?Node $parent = null;
-    public ?string $code = null;
+    public string $code = "";
+    public array $result = [];
 
 
     public function __construct(?string $character, float $weight)
@@ -108,6 +109,7 @@ class Huffmantree
     public  ?Node $cur = null;
     public int $sequence = 0;
     public ?Node $result = null;
+    public array $code_array = [];
 
 
     public function __construct(Huffmantree_date $huff)
@@ -166,48 +168,78 @@ class Huffmantree
         }
     }
 
-    public function search()
+    public function search($node): void //戻り値を持たない＝どこかに格納した処理のみ。
     {
-        $this->cur = $this->result; //$curを先頭に持ってくる
-
-        while (!($this->is_leaf($this->cur))) { //leafじゃないなら
-            $this->cur = $this->cur->left; //左下へ
-            $this->cur->visited_flag = true;
+        if ($node->left === null && $node->right === null) { // leafなら停止
+            if ($node->code === "") {
+                $node->code = "0";
+            }
+            $this->code_array[$node->character] = $node->code;
+            return;
         }
-        //leafへ到達
-        $this->cur = $this->cur->parent; //上へ
-        while ($this->cur->right->visited_flag) { //右下訪れた事あるのなら
-            $this->cur = $this->cur->parent; //上へ
+        $node->left->code = $node->code . "0";
+        $this->search($node->left);
+
+        $node->right->code = $node->code . "1";
+        $this->search($node->right);
+    }
+
+    public function  add_code(array $symbol_date): array
+    {
+        foreach ($this->code_array as $key => $value) {
+            for ($i = 0; $i < count($symbol_date); $i++) {
+                if ($symbol_date[$i]["character"] === $key) {
+                    $symbol_date[$i]["code"] =  $value;
+                    break;
+                }
+            }
         }
-        //右下未探索
-        $this->cur = $this->cur->right; //右下へ
-        $this->cur->visited_flag = true;
+        return $symbol_date;
+    }
+}
 
-        while (!($this->is_leaf($this->cur))) { //leafじゃないなら
-            $this->cur = $this->cur->left; //左下へ
-            $this->cur->visited_flag = true;
-        }
-        //この後leafではないため、上に戻る処理が必要
+class Encode
+{
+    public ?string $character_code = null;
+    public ?array $character_date = null;
+    public array $tmp  = [];
+    public function __construct($character_date)
+    {
+        $this->character_date = $character_date;
+    }
 
-
-
-
-
-
-
-
-
-
+    public function sort_character_code()
+    {
+        usort($this->character_date, function ($a, $b) {
+            $tmp = null;
+            $tmp = $a['count'] <=> $b['count'];
+        });
     }
 }
 
 
 
+
+
+
+
+
 $symbol_date = new symbol_date("abbbcc  d");
-var_dump($symbol_date->symbol_date);
+//var_dump($symbol_date->symbol_date);
 
 $huff = new Huffmantree_date($symbol_date);
 $Huffmantree = new Huffmantree($huff);
+$Huffmantree->make_tree();
+$Huffmantree->search($Huffmantree->result);
+$symbol_date = $Huffmantree->add_code($symbol_date->symbol_date);
+print_r($symbol_date);
+
+$encode = new Encode($symbol_date);
+$encode->sort_character_code();
+print_r($encode->tmp);
+
+
+
 
 
 // var_dump($a->symbol_array);
@@ -225,13 +257,7 @@ $Huffmantree = new Huffmantree($huff);
 //         } else { //leafじゃないなら
 
 
-function search($node)
-{
-    if ($node->left === null && $node->right === null) {
-        return;
-    }
-    $this->search($node->left);
-    $node->code = $node->code + "0";
-
-    $this->search($node->right);
-}
+// usort($results, function ($a, $b) { //$resultの要素を一つずつ取り出し、$a,$bに格納、
+//     $tmp = $b['Appearance_rate'] <=> $a['Appearance_rate']; //降順
+//     return $tmp;
+// });
