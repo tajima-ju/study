@@ -15,6 +15,11 @@ class symbol_date
         $this->make_symbol_date($this->symbol_array);
     }
 
+    public function get_symbol_array()
+    {
+        return $this->symbol_array;
+    }
+
     final public function make_symbol_array($symbol): array //入力された文字列を１文字に区切って配列として戻す
     {
         $this->symbol_array = mb_str_split($symbol, 1, 'UTF-8');
@@ -202,18 +207,59 @@ class Encode
 {
     public ?string $character_code = null;
     public ?array $character_date = null;
-    public array $tmp  = [];
+    public ?array $sort_character_date = null;
+    public string $encode_date = "";
     public function __construct($character_date)
     {
         $this->character_date = $character_date;
     }
 
+
+
     public function sort_character_code()
     {
         usort($this->character_date, function ($a, $b) {
-            $tmp = null;
-            $tmp = $a['count'] <=> $b['count'];
+            $tmp = $a['first_position'] <=> $b['first_position'];
+            return $tmp;
         });
+        $this->sort_character_date = $this->character_date;
+        return;
+    }
+
+
+    public function encode(array $symbol_date)
+    {
+        $encode  = '';
+
+        for ($i = 0; $i < count($symbol_date); $i++) {
+            foreach ($this->sort_character_date as $key => $value) {
+                if ($value['character'] === $symbol_date[$i]) {
+                    $encode .= $value['code'];
+                    break;
+                }
+            }
+        }
+        $this->encode_date = $encode;
+        return;
+    }
+
+    public function get_character_date()
+    {
+        return $this->character_date;
+    }
+}
+
+class Decode
+{
+    public $encode_date = ""; //0011...
+
+    public function __construct($encode_date)
+    {
+        $this->encode_date = $encode_date;
+    }
+    public function decode($encode_date)
+    {
+        $character_date = $encode_date;
     }
 }
 
@@ -223,24 +269,33 @@ class Encode
 
 
 
+$symbol_date = new symbol_date("aaabbbccc");
+// var_dump($symbol_date->symbol_date);
 
-$symbol_date = new symbol_date("abbbcc  d");
-//var_dump($symbol_date->symbol_date);
 
 $huff = new Huffmantree_date($symbol_date);
 $Huffmantree = new Huffmantree($huff);
 $Huffmantree->make_tree();
 $Huffmantree->search($Huffmantree->result);
-$symbol_date = $Huffmantree->add_code($symbol_date->symbol_date);
-print_r($symbol_date);
+$new_symbol_date = $Huffmantree->add_code($symbol_date->symbol_date);
 
-$encode = new Encode($symbol_date);
+$encode = new Encode($new_symbol_date);
 $encode->sort_character_code();
-print_r($encode->tmp);
+print_r($encode->character_date);
+
+$encode->encode($symbol_date->get_symbol_array());
+echo $encode->encode_date;
+
+$decode = new Decode($encode->encode_date);
+
+$decode->decode($encode->get_character_date());
+
+// print_r($symbol_date->symbol_array);
 
 
 
 
+    //  
 
 // var_dump($a->symbol_array);
 // var_dump($a->test);

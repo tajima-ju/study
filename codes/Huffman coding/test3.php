@@ -5,5 +5,11 @@ $a = [
     2 => ["cnt" => 1, "char" => "B"],
 ];
 
-print_r($a);
-print_r(asort($a["cnt"]));
+$b = [];
+
+// print_r($a);
+foreach ($a as $key => $value) {
+    $b[] = $value['cnt'];
+}
+
+print_r($b);
