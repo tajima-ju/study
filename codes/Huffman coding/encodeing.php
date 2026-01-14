@@ -23,7 +23,7 @@ class CharacterDate
         } else {
             $this->character = $symbol;
         }
-        $this->Split_Into_Character($symbol);
+        $this->Split_Into_Character($this->character);
         $this->Create_Character_Date($this->character_list);
     }
 
@@ -73,8 +73,25 @@ class CharacterDate
 
         $this->character_date = $unsorted_character_date;
     }
+
+    public function get_count_date(): array
+    {
+        return array_column($this->character_date, 'count', 'character');
+    }
 }
 
+class Huffman_tree_date
+{
+    public array $huffmantree_date;
+
+    public function __construct(array $huffmantree_date)
+    {
+        if(!(array_key_exists("",$huffmantree_date))){
+throw new
+        }
+        $this->huffmantree_date = $huffmantree_date;
+    }
+}
 
 
 try {
@@ -83,4 +100,8 @@ try {
     echo "値が不正です:" . $exception->getMessage();
 }
 // print_r($character_date->character_list);
-print_r($character_date->character_date);
+// print_r($character_date->character_date);
+
+$huffman_tree_date = new Huffman_tree_date($character_date->get_count_date());
+
+print_r($huffman_tree_date->huffmantree_date);
