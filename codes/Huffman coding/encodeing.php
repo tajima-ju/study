@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Encoding;
 
-use Exception;
+use InvalidArgumentException;
 
 class CharacterDate
 {
@@ -17,9 +17,9 @@ class CharacterDate
     public function __construct(int|string|null $symbol)
     {
         if ($symbol === null) {
-            throw new Exception('nullが入っています');
+            throw new InvalidArgumentException('symbol must not contain null');
         } elseif (is_int($symbol)) {
-            $this->character = strval($symbol);
+            $this->character = strval($symbol); //数値であれば文字列に変換
         } else {
             $this->character = $symbol;
         }
@@ -74,7 +74,7 @@ class CharacterDate
         $this->character_date = $unsorted_character_date;
     }
 
-    public function get_count_date(): array
+    public function get_count_date(): array //huffmantree_dateに a=>4のような配列を生成して渡す
     {
         return array_column($this->character_date, 'count', 'character');
     }
@@ -86,18 +86,36 @@ class Huffman_tree_date
 
     public function __construct(array $huffmantree_date)
     {
-        if(!(array_key_exists("",$huffmantree_date))){
-throw new
+        if ($huffmantree_date === []) {
+            throw new InvalidArgumentException('huffmantree_date must not be empty');
+        }
+
+        foreach ($huffmantree_date as $chara => $count) {
+
+            if (!is_string($chara)) {
+                throw new InvalidArgumentException('huffmantree_date_chara must be string');
+            }
+            if ($chara === '' || mb_strlen($chara, 'UTF-8') !== 1) {
+                throw new InvalidArgumentException('huffmantree_date is invalid');
+            }
+
+            if ($count === '' || !is_int($count) || $count <= 0) {
+                throw new InvalidArgumentException('huffmantree_date is invalid');
+            }
         }
         $this->huffmantree_date = $huffmantree_date;
     }
 }
 
 
+
+
+
+
 try {
     $character_date = new CharacterDate('aaaccccbbb');
-} catch (Exception $exception) {
-    echo "値が不正です:" . $exception->getMessage();
+} catch (InvalidArgumentException $exception) {
+    echo "入力された値が不正です:" . $exception->getMessage();
 }
 // print_r($character_date->character_list);
 // print_r($character_date->character_date);
