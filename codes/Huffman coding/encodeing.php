@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Encoding;
 
 use InvalidArgumentException;
+use SplPriorityQueue;
 
 class CharacterDate
 {
@@ -64,7 +65,7 @@ class CharacterDate
         //             [character] => a
         //         )
         usort($unsorted_character_date, function ($a, $b) { //第一優先count降順、第二優先first_position昇順
-            $tmp = $b['count'] <=> $a['count'];
+            $tmp = $a['count'] <=> $b['count'];
             if ($tmp === 0) {
                 $tmp = $a['first_position'] <=> $b['first_position'];
             }
@@ -93,17 +94,97 @@ class Huffman_tree_date
         foreach ($huffmantree_date as $chara => $count) {
 
             if (!is_string($chara)) {
-                throw new InvalidArgumentException('huffmantree_date_chara must be string');
+                throw new InvalidArgumentException('huffmantree_date key must be a string got:' . gettype($chara));
             }
-            if ($chara === '' || mb_strlen($chara, 'UTF-8') !== 1) {
-                throw new InvalidArgumentException('huffmantree_date is invalid');
+            if ($chara === '') {
+                throw new InvalidArgumentException('huffmantree_date key must not be empty');
+            }
+            if (mb_strlen($chara, 'UTF-8') !== 1) {
+                throw new InvalidArgumentException('huffmantree_date key must be exactly 1 character');
             }
 
-            if ($count === '' || !is_int($count) || $count <= 0) {
-                throw new InvalidArgumentException('huffmantree_date is invalid');
+            if (!is_int($count)) {
+                throw new InvalidArgumentException('huffmantree_date value must be an int got:' . gettype($count));
+            }
+            if ($count <= 0) {
+                throw new InvalidArgumentException("huffmantree_date value must be greater than 0.key='{$chara}'");
             }
         }
         $this->huffmantree_date = $huffmantree_date;
+    }
+}
+
+class Node
+{
+    public ?string $character = null;
+    public int $weight = 0;
+    public ?Node $left_child_node = null;
+    public ?Node $right_child_node = null;
+
+    public ?Node $parent_node = null;
+    public string $code = "";
+    public ?int $insertion_number = null;
+
+    public function __construct(?string $character, int $weight)
+    {
+        if ($character === "") {
+            throw new InvalidArgumentException('character must not be empty');
+        }
+        if ($weight <= 0) {
+            throw new InvalidArgumentException('weight must be greater than 0');
+        }
+
+        $this->character = $character;
+        $this->weight = $weight;
+    }
+}
+
+class Huffmantree
+
+{
+    public SplPriorityQueue $storedpriorityqueue;
+
+    public int $insertion_number = 1;
+
+    public ?Node $result = null;
+    public function __construct(Huffman_tree_date $huffman_tree_date)
+    {
+
+        $insertion_number = 1;
+        $splpriorityqueue = new SplPriorityQueue();
+        foreach ($huffman_tree_date->huffmantree_date as $chara => $count) {
+            $node = new Node($chara, $count);
+            $node->insertion_number = $insertion_number;
+            $splpriorityqueue->insert($node, [-$node->weight, -$node->insertion_number]);
+            $insertion_number++;
+        }
+        $this->storedpriorityqueue = $splpriorityqueue;
+        $this->insertion_number = $insertion_number;
+        $this->make_huffmantree();
+    }
+
+    public function make_huffmantree()
+    {
+
+        if ($this->storedpriorityqueue->count() === 1) {
+            $this->result = $this->storedpriorityqueue->extract();
+        }
+        $node = new Node(null, 0); //親ノード作成
+
+        $child_node1 = $this->storedpriorityqueue->extract(); //子ノードを2つ作成
+        $child_node2 = $this->storedpriorityqueue->extract();
+
+        $node->left_child_node = $child_node1;
+        $node->right_child_node = $child_node2;
+        $node->weight = $child_node1->weight + $child_node2->weight;
+
+        $child_node1->parent = $node;
+        $child_node2->parent = $node;
+        $node->insertion_number = $this->insertion_number;
+        $this->storedpriorityqueue->insert($node, [-$node->weight, -$node->insertion_number]);
+        $this->insertion_number++;
+
+        return $this->make_huffmantree();
     }
 }
 
@@ -113,13 +194,16 @@ class Huffman_tree_date
 
 
 try {
-    $character_date = new CharacterDate('aaaccccbbb');
+    $character_date = new CharacterDate('aacccccbdddeeee');
+    $huffman_tree_date = new Huffman_tree_date($character_date->get_count_date());
 } catch (InvalidArgumentException $exception) {
     echo "入力された値が不正です:" . $exception->getMessage();
 }
 // print_r($character_date->character_list);
 // print_r($character_date->character_date);
 
-$huffman_tree_date = new Huffman_tree_date($character_date->get_count_date());
-
 print_r($huffman_tree_date->huffmantree_date);
+
+$huffmantree = new Huffmantree($huffman_tree_date);
+
+var_dump($huffmantree->result);
