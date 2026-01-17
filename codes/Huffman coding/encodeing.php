@@ -79,6 +79,11 @@ class CharacterDate
     {
         return array_column($this->character_date, 'count', 'character');
     }
+
+    public function get_character_list(): array
+    {
+        return $this->character_list;
+    }
 }
 
 class Huffman_tree_date
@@ -125,6 +130,8 @@ class Node
     public string $code = "";
     public ?int $insertion_number = null;
 
+
+
     public function __construct(?string $character, int $weight)
     {
         if ($character === "") {
@@ -147,46 +154,48 @@ class Huffmantree
     public int $insertion_number = 1;
 
     public ?Node $result = null;
+    public array $character_code = [];
     public function __construct(Huffman_tree_date $huffman_tree_date)
     {
 
         $insertion_number = 1;
         $splpriorityqueue = new SplPriorityQueue();
-        foreach ($huffman_tree_date->huffmantree_date as $chara => $count) {
+        foreach ($huffman_tree_date->huffmantree_date as $chara => $count) { //受け取った配列データをもとにノードを作成し、優先度つきキューに格納していく
             $node = new Node($chara, $count);
-            $node->insertion_number = $insertion_number;
+            $node->insertion_number = $insertion_number; //登録順番号を付与
             $splpriorityqueue->insert($node, [-$node->weight, -$node->insertion_number]);
             $insertion_number++;
         }
         $this->storedpriorityqueue = $splpriorityqueue;
         $this->insertion_number = $insertion_number;
-        $this->make_huffmantree();
+        $this->make_huffmantree($this->storedpriorityqueue);
+        $this->search($this->result);
     }
 
-    public function make_huffmantree()
+    public function make_huffmantree(SplPriorityQueue $storedpriorityqueue)
     {
-        if ($this->storedpriorityqueue->count() === 1) {
-            $this->result = $this->storedpriorityqueue->extract();
+        if ($storedpriorityqueue->count() === 1) {
+            $this->result = $storedpriorityqueue->extract();
             return;
         }
         $node = new Node(null, 0); //親ノード作成
-        $child_node1 = $this->storedpriorityqueue->extract(); //子ノードを2つ作成
-        $child_node2 = $this->storedpriorityqueue->extract();
+        $child_node1 = $storedpriorityqueue->extract(); //子ノードを2つ作成
+        $child_node2 = $storedpriorityqueue->extract();
 
-        $node->left_child_node = $child_node1;
+        $node->left_child_node = $child_node1; //左右に子ノード登録
         $node->right_child_node = $child_node2;
         $node->weight = $child_node1->weight + $child_node2->weight;
 
-        $child_node1->parent = $node;
+        $child_node1->parent = $node; //子ノードに親ノード登録
         $child_node2->parent = $node;
         $node->insertion_number = $this->insertion_number;
-        $this->storedpriorityqueue->insert($node, [-$node->weight, -$node->insertion_number]);
+        $storedpriorityqueue->insert($node, [-$node->weight, -$node->insertion_number]); //作成ノードをキューに戻す
         $this->insertion_number++;
 
-        return $this->make_huffmantree();
+        return $this->make_huffmantree($storedpriorityqueue);
     }
 
-    public function isleaf(Node $node)
+    public function isleaf(Node $node): bool //葉かどうか確認する
     {
         if ($node->left_child_node === null && $node->right_child_node === null) {
             return true;
@@ -197,8 +206,18 @@ class Huffmantree
 
     public function search(Node $node)
     {
-        if ($this->isleaf($node)) {
+        if ($this->isleaf($node)) { //nodeが葉だった場合は停止する
+            if ($node->code === "") { //最初のnodeが一つのみ（葉）だった場合（入力された文字が１文字）
+                $node->code = "0";
+            }
+            $this->character_code[$node->character] = $node->code; //[a]=>00のような配列を作成
+            return;
         }
+        $node->left_child_node->code = $node->code . "0"; //左なら、左の子のcodeに0を追加していく
+        $this->search($node->left_child_node);
+
+        $node->right_child_node->code = $node->code . "1";
+        $this->search($node->right_child_node);
     }
 }
 
@@ -208,7 +227,7 @@ class Huffmantree
 
 
 try {
-    $character_date = new CharacterDate('aacccccbdddeeee');
+    $character_date = new CharacterDate('aabbbcd');
     $huffman_tree_date = new Huffman_tree_date($character_date->get_count_date());
 } catch (InvalidArgumentException $exception) {
     echo "入力された値が不正です:" . $exception->getMessage();
@@ -221,4 +240,7 @@ try {
 $huffmantree = new Huffmantree($huffman_tree_date);
 
 // print_r($huffmantree->storedpriorityqueue);
-var_dump($huffmantree->result);
+// var_dump($huffmantree->result);
+print_r($huffmantree->character_code);
+
+print_r($character_date->get_character_list());
