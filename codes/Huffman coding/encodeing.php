@@ -130,7 +130,7 @@ class Node
         if ($character === "") {
             throw new InvalidArgumentException('character must not be empty');
         }
-        if ($weight <= 0) {
+        if ($weight < 0) {
             throw new InvalidArgumentException('weight must be greater than 0');
         }
 
@@ -165,12 +165,11 @@ class Huffmantree
 
     public function make_huffmantree()
     {
-
         if ($this->storedpriorityqueue->count() === 1) {
             $this->result = $this->storedpriorityqueue->extract();
+            return;
         }
         $node = new Node(null, 0); //親ノード作成
-
         $child_node1 = $this->storedpriorityqueue->extract(); //子ノードを2つ作成
         $child_node2 = $this->storedpriorityqueue->extract();
 
@@ -185,6 +184,21 @@ class Huffmantree
         $this->insertion_number++;
 
         return $this->make_huffmantree();
+    }
+
+    public function isleaf(Node $node)
+    {
+        if ($node->left_child_node === null && $node->right_child_node === null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function search(Node $node)
+    {
+        if ($this->isleaf($node)) {
+        }
     }
 }
 
@@ -202,8 +216,9 @@ try {
 // print_r($character_date->character_list);
 // print_r($character_date->character_date);
 
-print_r($huffman_tree_date->huffmantree_date);
+// print_r($huffman_tree_date->huffmantree_date);
 
 $huffmantree = new Huffmantree($huffman_tree_date);
 
+// print_r($huffmantree->storedpriorityqueue);
 var_dump($huffmantree->result);
