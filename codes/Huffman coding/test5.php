@@ -1,15 +1,9 @@
 <?php
-class Test
-{
-    public $a = 10;
 
-    public function test()
-    {
-        $this->a = 15;
-        return;
-    }
-}
+$num = 111;
+var_dump($num);
+$str = "";
 
-$test = new Test();
-$test->test();
-echo $test->a;
+$str = strval($num);
+
+var_dump($str);
