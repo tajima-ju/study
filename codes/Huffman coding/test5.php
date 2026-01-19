@@ -1,9 +1,17 @@
 <?php
+function add()
+{
+    static $num1 = 1;
+    if ($num1 <= 100) {
+        $num1++;
+        add();
+    }
+    return $num1;
+}
+// echo add();
 
-$num = 111;
-var_dump($num);
-$str = "";
 
-$str = strval($num);
 
-var_dump($str);
+
+// $num2 =1;
+// function add2(){

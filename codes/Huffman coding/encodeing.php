@@ -263,6 +263,8 @@ class Encode
 }
 
 
+
+
 try {
     $character_date = new CharacterDate("");
     $huffman_tree_date = new Huffman_tree_date($character_date->get_count_date());
