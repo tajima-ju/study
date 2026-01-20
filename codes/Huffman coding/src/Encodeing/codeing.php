@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-class symbol_date
+class symbol_data
 {
     public int|string $symbol;
     public array $symbol_array;
-    public array $symbol_date;
+    public array $symbol_data;
 
     final public function __construct($symbol)
     {
         $this->symbol = $symbol;
         $this->make_symbol_array($this->symbol);
-        $this->make_symbol_date($this->symbol_array);
+        $this->make_symbol_data($this->symbol_array);
     }
 
     public function get_symbol_array()
@@ -28,7 +28,7 @@ class symbol_date
     }
 
 
-    final public function make_symbol_date($symbol_array): array //シンボルデータを作成、$resultに受け取った配列のデータを作成、格納する
+    final public function make_symbol_data($symbol_array): array //シンボルデータを作成、$resultに受け取った配列のデータを作成、格納する
     {
         $cnt  = []; //出現回数
         $first_position = []; //初登場した位置
@@ -69,21 +69,21 @@ class symbol_date
         });
 
 
-        return  $this->symbol_date = $results;
+        return  $this->symbol_data = $results;
     }
 }
 
-class Huffmantree_date
+class Huffmantree_data
 {
-    private array $huffmantree_date;
-    public function __construct(symbol_date $src)
+    private array $huffmantree_data;
+    public function __construct(symbol_data $src)
     {
-        $this->huffmantree_date = array_column($src->symbol_date, 'Appearance_rate', 'character');
+        $this->huffmantree_data = array_column($src->symbol_data, 'Appearance_rate', 'character');
     }
 
-    public function get_huffmantree_date(): array
-    { //$huffmantree_dateのゲッター
-        return $this->huffmantree_date;
+    public function get_huffmantree_data(): array
+    { //$huffmantree_dataのゲッター
+        return $this->huffmantree_data;
     }
 }
 
@@ -117,11 +117,11 @@ class Huffmantree
     public array $code_array = [];
 
 
-    public function __construct(Huffmantree_date $huff)
+    public function __construct(Huffmantree_data $huff)
     {
         $sequence = 0;
         $this->priorityQueue = new SplPriorityQueue();
-        $this->tmp = $huff->get_huffmantree_date();
+        $this->tmp = $huff->get_huffmantree_data();
         foreach ($this->tmp as $character => $weight) {
             $node = new Node($character, $weight);
             $this->priorityQueue->insert($node, [-$node->weight, -$sequence]); //キューに入れるデータ：優先順位（大きい値が先頭にくる）マイナスをつけることで小さい値から取り出す。配列にすることで第二優先順位
@@ -189,77 +189,77 @@ class Huffmantree
         $this->search($node->right);
     }
 
-    public function  add_code(array $symbol_date): array
+    public function  add_code(array $symbol_data): array
     {
         foreach ($this->code_array as $key => $value) {
-            for ($i = 0; $i < count($symbol_date); $i++) {
-                if ($symbol_date[$i]["character"] === $key) {
-                    $symbol_date[$i]["code"] =  $value;
+            for ($i = 0; $i < count($symbol_data); $i++) {
+                if ($symbol_data[$i]["character"] === $key) {
+                    $symbol_data[$i]["code"] =  $value;
                     break;
                 }
             }
         }
-        return $symbol_date;
+        return $symbol_data;
     }
 }
 
 class Encode
 {
     public ?string $character_code = null;
-    public ?array $character_date = null;
-    public ?array $sort_character_date = null;
-    public string $encode_date = "";
-    public function __construct($character_date)
+    public ?array $character_data = null;
+    public ?array $sort_character_data = null;
+    public string $encode_data = "";
+    public function __construct($character_data)
     {
-        $this->character_date = $character_date;
+        $this->character_data = $character_data;
     }
 
 
 
     public function sort_character_code()
     {
-        usort($this->character_date, function ($a, $b) {
+        usort($this->character_data, function ($a, $b) {
             $tmp = $a['first_position'] <=> $b['first_position'];
             return $tmp;
         });
-        $this->sort_character_date = $this->character_date;
+        $this->sort_character_data = $this->character_data;
         return;
     }
 
 
-    public function encode(array $symbol_date)
+    public function encode(array $symbol_data)
     {
         $encode  = '';
 
-        for ($i = 0; $i < count($symbol_date); $i++) {
-            foreach ($this->sort_character_date as $key => $value) {
-                if ($value['character'] === $symbol_date[$i]) {
+        for ($i = 0; $i < count($symbol_data); $i++) {
+            foreach ($this->sort_character_data as $key => $value) {
+                if ($value['character'] === $symbol_data[$i]) {
                     $encode .= $value['code'];
                     break;
                 }
             }
         }
-        $this->encode_date = $encode;
+        $this->encode_data = $encode;
         return;
     }
 
-    public function get_character_date()
+    public function get_character_data()
     {
-        return $this->character_date;
+        return $this->character_data;
     }
 }
 
 class Decode
 {
-    public $encode_date = ""; //0011...
+    public $encode_data = ""; //0011...
 
-    public function __construct($encode_date)
+    public function __construct($encode_data)
     {
-        $this->encode_date = $encode_date;
+        $this->encode_data = $encode_data;
     }
-    public function decode($encode_date)
+    public function decode($encode_data)
     {
-        $character_date = $encode_date;
+        $character_data = $encode_data;
     }
 }
 
@@ -269,28 +269,28 @@ class Decode
 
 
 
-$symbol_date = new symbol_date("aaabbbccc");
-// var_dump($symbol_date->symbol_date);
+$symbol_data = new symbol_data("aaabbbccc");
+// var_dump($symbol_data->symbol_data);
 
 
-$huff = new Huffmantree_date($symbol_date);
+$huff = new Huffmantree_data($symbol_data);
 $Huffmantree = new Huffmantree($huff);
 $Huffmantree->make_tree();
 $Huffmantree->search($Huffmantree->result);
-$new_symbol_date = $Huffmantree->add_code($symbol_date->symbol_date);
+$new_symbol_data = $Huffmantree->add_code($symbol_data->symbol_data);
 
-$encode = new Encode($new_symbol_date);
+$encode = new Encode($new_symbol_data);
 $encode->sort_character_code();
-print_r($encode->character_date);
+print_r($encode->character_data);
 
-$encode->encode($symbol_date->get_symbol_array());
-echo $encode->encode_date;
+$encode->encode($symbol_data->get_symbol_array());
+echo $encode->encode_data;
 
-$decode = new Decode($encode->encode_date);
+$decode = new Decode($encode->encode_data);
 
-$decode->decode($encode->get_character_date());
+$decode->decode($encode->get_character_data());
 
-// print_r($symbol_date->symbol_array);
+// print_r($symbol_data->symbol_array);
 
 
 
@@ -300,7 +300,7 @@ $decode->decode($encode->get_character_date());
 // var_dump($a->symbol_array);
 // var_dump($a->test);
 
-// print_r($huff->huffmantree_date);
+// print_r($huff->huffmantree_data);
 //  $priorityQueue->insert($this->tmp[$i],-$this->tmp[$i][]);
 
 
