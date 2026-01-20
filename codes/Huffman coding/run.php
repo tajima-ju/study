@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 require __DIR__ . '/bootstrap/autoload.php'; //まずオートロードを読み込む
 
-
-
 use Encoding\HuffmanTreedata;
 use Encoding\CharacterData;
 use Encoding\Node;
@@ -19,12 +17,7 @@ try {
     echo "入力された値が不正です:" . $exception->getMessage();
 }
 
-
-
-
 $huffmantree = new HuffmanTree($huffman_tree_data);
-
-
 
 $encode  = new Encode($character_data->get_character_list(), $huffmantree->get_character_code_list());
 
