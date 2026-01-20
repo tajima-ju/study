@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-spl_autoload_register(function (string $class): void {
+spl_autoload_register(function (string $class): void { //$charaはEncoding\ファイル名
     $base_dir = __DIR__ . "/../src/";
     $file = $base_dir . str_replace('\\', '/', $class) . '.php';
 
