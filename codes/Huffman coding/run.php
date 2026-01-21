@@ -11,7 +11,7 @@ use Encoding\HuffmanTree;
 use Encoding\Encode;
 
 try {
-    $character_data = new CharacterData("sss");
+    $character_data = new CharacterData("aabbcc");
     $huffman_tree_data = new HuffmanTreeData($character_data->get_count_data());
 } catch (InvalidArgumentException $exception) {
     echo "入力された値が不正です:" . $exception->getMessage();
@@ -21,4 +21,6 @@ $huffmantree = new HuffmanTree($huffman_tree_data);
 
 $encode  = new Encode($character_data->get_character_list(), $huffmantree->get_character_code_list());
 
-echo $encode->show_character_code();
+// echo $encode->show_character_code();
+
+var_dump($encode->show_character_code());
