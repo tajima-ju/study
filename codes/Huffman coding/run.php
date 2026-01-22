@@ -11,7 +11,7 @@ use Encoding\HuffmanTree;
 use Encoding\Encode;
 
 try {
-    $character_data = new CharacterData("aabbcc");
+    $character_data = new CharacterData("abfhfjff");
     $huffman_tree_data = new HuffmanTreeData($character_data->get_count_data());
 } catch (InvalidArgumentException $exception) {
     echo "入力された値が不正です:" . $exception->getMessage();

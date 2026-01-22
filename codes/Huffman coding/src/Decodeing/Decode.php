@@ -2,29 +2,48 @@
 
 declare(strict_types=1);
 
+namespace Decoding;
+
+use InvalidArgumentException;
+
 class Decode
 {
+    private array $flipped_character_code_list;
+    private string $character_code;
 
-    public $character = "";
+    public string $decoded_character = "";
+
     public function __construct(array $character_code_list, string $character_code)
     {
-        $flipped_character_code_list = array_flip($character_code_list);
 
-        $split_character_code = str_split($character_code, 1);
 
+        $this->flipped_character_code_list = array_flip($character_code_list);
+        $this->character_code = $character_code;
+    }
+
+    public function decoding(): void
+    {
         $character = "";
-        $tmp_code = null;
-        for ($i = 0; $i < count($split_character_code); $i++) {
-            $tmp_code .= $split_character_code[$i];
-            for ($j = 0; $j < count($flipped_character_code_list); $j++) {
-                if (isset($flipped_character_code_list[$tmp_code])) {
-                    $character .= $flipped_character_code_list[$tmp_code];
-                    $tmp_code = null;
-                }
+        $tmp_code = "";
+        $character_code_length = strlen($this->character_code);
+
+        for ($i = 0; $i < $character_code_length; $i++) {
+            $tmp_code .= $this->character_code[$i]; //文字列の先頭から取り出していく
+
+            if (isset($flipped_character_code_list[$tmp_code])) {
+                $character .= $this->flipped_character_code_list[$tmp_code];
+                $tmp_code = "";
+
+                continue;
             }
+        }
+        if ($tmp_code !== "") {
+            throw new InvalidArgumentException("Encode is failed");
         }
         $this->character = $character;
     }
+
+    fun
 }
 
 
@@ -37,4 +56,4 @@ $character_code_list = [
 $character_code = "0010111100";
 $decode = new Decode($character_code_list, $character_code);
 
-var_dump($decode->character);
+var_dump($decode->decoded_character);
