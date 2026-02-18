@@ -6,7 +6,7 @@ $json_string = file_get_contents($path);
 
 $json_data = json_decode($json_string, true);
 
-$character = "h";
+$character = "moka";
 
 $character_size = strlen($character);
 
@@ -23,7 +23,7 @@ for ($i = 0; $i <= $date_size; $i++) { //キーを0からに整形
 
 for ($i = 0; $i <= $date_size; $i++) {
     if ($normalized_chara_dec_data[$i] < 128) {
-        $bin = str_pad(decbin($normalized_chara_dec_data[$i]), 8, "0", STR_PAD_LEFT); //左に0を詰める
+        $bin = str_pad(decbin($normalized_chara_dec_data[$i]), 8, "0", STR_PAD_LEFT); //左に0を詰め、８ビットに整形
         $chara_bin_data[] = $bin;
         continue;
     }
@@ -41,10 +41,9 @@ for ($i = 0; $i <= $date_size; $i++) { //一つの文字列に連結
 $divide_bits = str_split($seq_chara_bin, 6);
 $divide_bits_size = count($divide_bits);
 
-if ($character_size % 3 === 1) { //6文字ずつ分解、足りない箇所に0を補い配列化
-    $divide_bits[$divide_bits_size - 1] .= "0000";
-} elseif ($character_size % 3 === 2) {
-    $divide_bits[$divide_bits_size - 1] .= "00";
+
+if (strlen($divide_bits[$divide_bits_size - 1]) !== 6) {
+    $divide_bits[$divide_bits_size - 1] = str_pad($divide_bits[$divide_bits_size - 1], 6, "0", STR_PAD_RIGHT); ////6文字ずつ分解、足りない箇所に0を補い配列化
 }
 
 $base64_char = "";
@@ -55,9 +54,7 @@ for ($i = 0; $i < $divide_bits_size; $i++) { //base64のビット列と合致し
 }
 
 $base64_char_size = strlen($base64_char); //4文字ずつ区切り足りない箇所に=を補う
-if ($base64_char_size % 4 === 1) {
-    $base64_char .= '===';
-} elseif ($base64_char_size % 4 === 2) {
+if ($base64_char_size % 4 === 2) {
     $base64_char .= '==';
 } elseif ($base64_char_size % 4 === 3) {
     $base64_char .= '=';
