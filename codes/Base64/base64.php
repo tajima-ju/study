@@ -1,5 +1,5 @@
 <?php
-$path = __DIR__ . '\Base64\base64_table.json';
+$path = __DIR__ . '\base64_table.json';
 
 $json_string = file_get_contents($path);
 
