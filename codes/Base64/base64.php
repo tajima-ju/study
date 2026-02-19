@@ -3,64 +3,51 @@ $path = __DIR__ . '\base64_table.json';
 
 $json_string = file_get_contents($path);
 
-
 $json_data = json_decode($json_string, true);
 
-$character = "h";
+$character = "舞波歩";
 
-$character_size = strlen($character);
+$character_dec_data = unpack("C*", $character); //文字を8bit整数値として配列化
+$character_dec_data_size = count($character_dec_data); //配列の要素数
 
-$split_chara_data = str_split($character); //1文字ずつ分解、配列化
+$character_bin = "";
+foreach ($character_dec_data as $key => $value) { //数値を2進数に変換、連結
+    $bin = decbin($value);
 
-$date_size = count($split_chara_data) - 1;
-
-for ($i = 0; $i <= $date_size; $i++) { //2進数に変換、配列化
-    $chara_dec_data[] = unpack("C", $split_chara_data[$i]);
-}
-for ($i = 0; $i <= $date_size; $i++) { //キーを0からに整形
-    $normalized_chara_dec_data[] = $chara_dec_data[$i]["1"];
-}
-
-for ($i = 0; $i <= $date_size; $i++) {
-    if ($normalized_chara_dec_data[$i] < 128) {
-        $bin = str_pad(decbin($normalized_chara_dec_data[$i]), 8, "0", STR_PAD_LEFT); //左に0を詰める
-        $chara_bin_data[] = $bin;
-        continue;
+    if (strlen($bin) !== 8) {
+        $bin = str_pad($bin, 8, "0", STR_PAD_LEFT);
     }
-    $bin = decbin($normalized_chara_dec_data[$i]);
-    $chara_bin_data[] = $bin;
+    $character_bin .= $bin;
+}
+$character_bin_size = strlen($character_bin); //2進数の長さ
+$character_bin_data = str_split($character_bin, 6); //6文字ずつに分解、配列化
+$character_bin_data_last_index_num = count($character_bin_data) - 1; //最後の添え字番号
+
+if ($character_bin_size % 6 === 2) { //6文字区切りで足りない0を補う
+    $character_bin_data[$character_bin_data_last_index_num] .= '0000';
+} elseif ($character_bin_size % 6 === 4) {
+    $character_bin_data[$character_bin_data_last_index_num] .= '00';
 }
 
-
-
-$seq_chara_bin = "";
-for ($i = 0; $i <= $date_size; $i++) { //一つの文字列に連結
-    $seq_chara_bin .= $chara_bin_data[$i];
-}
-
-$divide_bits = str_split($seq_chara_bin, 6);
-$divide_bits_size = count($divide_bits);
-
-if ($character_size % 3 === 1) { //6文字ずつ分解、足りない箇所に0を補い配列化
-    $divide_bits[$divide_bits_size - 1] .= "0000";
-} elseif ($character_size % 3 === 2) {
-    $divide_bits[$divide_bits_size - 1] .= "00";
-}
+$character_bin_data_size = count($character_bin_data);
 
 $base64_char = "";
-for ($i = 0; $i < $divide_bits_size; $i++) { //base64のビット列と合致した文字列を取り出す
-    if (isset($json_data["standard"]["binary_to_char"][$divide_bits[$i]])) {
-        $base64_char .= $json_data["standard"]["binary_to_char"][$divide_bits[$i]];
-    }
+for ($i = 0; $i < $character_bin_data_size; $i++) { //jsonテーブルから合致する文字をとってくる
+    $base64_char .= $json_data["standard"]["binary_to_char"][$character_bin_data[$i]];
 }
 
-$base64_char_size = strlen($base64_char); //4文字ずつ区切り足りない箇所に=を補う
-if ($base64_char_size % 4 === 1) {
-    $base64_char .= '===';
-} elseif ($base64_char_size % 4 === 2) {
+$base64_chara_size = strlen($base64_char);
+
+
+$mod = $base64_chara_size % 4;
+if ($mod === 2) { //4文字区切りで足りない箇所を=で補う
     $base64_char .= '==';
-} elseif ($base64_char_size % 4 === 3) {
+} elseif ($mod === 3) {
     $base64_char .= '=';
 }
 
-echo $base64_char;
+
+
+
+// var_dump($character_bin_data);
+var_dump($base64_char);
